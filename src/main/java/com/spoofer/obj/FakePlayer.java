@@ -11,7 +11,7 @@ public class FakePlayer extends FakeEntity {
         super(name, visible, location);
     }
 
-    public FakePlayer(String name, boolean visible, String rank, Location location) {
-        super(name, visible, rank, location);
+    public FakePlayer(String name, boolean visible, String rank, String suffix,Location location) {
+        super(name, visible, rank, suffix,location);
     }
 }

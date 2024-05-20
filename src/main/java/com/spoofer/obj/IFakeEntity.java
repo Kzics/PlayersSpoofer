@@ -1,6 +1,7 @@
 package com.spoofer.obj;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 public interface IFakeEntity {
     void join();
@@ -13,5 +14,6 @@ public interface IFakeEntity {
     String getName();
     String changeName(String name);
     Location getLocation();
+    void spawn(Player player);
 
 }

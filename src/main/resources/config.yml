@@ -1,0 +1,13 @@
+bot-world: "world"
+join-interval: 5
+multiplier: 3
+enable-joins-message: true # Enable or disable the join message
+
+join-message: "&e%player% joined the game!"
+leave-message: "&e%player% left the game!"
+
+ranks:
+  - "default"
+  - "vip"
+  - "moderator"
+  - "admin"
