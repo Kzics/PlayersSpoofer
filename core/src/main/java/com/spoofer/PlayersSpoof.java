@@ -1,11 +1,11 @@
 package com.spoofer;
 
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
+import com.spoofer.commands.SpooferCommands;
 import com.spoofer.manager.FakePlayerManager;
-import com.spoofer.obj.FakePlayer;
+import com.spoofer.obj.IFakeEntity;
+import com.spoofer.tasks.FakePlayersRunnable;
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.group.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,8 +14,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.util.List;
-import java.util.Random;
+import java.util.ServiceLoader;
 
 public class PlayersSpoof extends JavaPlugin implements Listener {
 
@@ -25,7 +24,9 @@ public class PlayersSpoof extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-
+//3700 1.20.4 3839 : 1.20.6
+        int packageName = Bukkit.getUnsafe().getDataVersion();
+        System.out.println(packageName);
         try {
             if(!getDataFolder().exists())
                 getDataFolder().mkdir();
@@ -35,20 +36,24 @@ public class PlayersSpoof extends JavaPlugin implements Listener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
+        System.out.println(Bukkit.getVersion());
+        System.out.println(Bukkit.getBukkitVersion());
         this.fakePlayerManager = new FakePlayerManager(this);
         getServer().getPluginManager().registerEvents(this, this);
         fakePlayerManager.setMultiplier(getConfig().getInt("multiplier"));
         fakePlayerManager.setJoinInterval(getConfig().getInt("join-interval"));
+        getCommand("spoofer").setExecutor(new SpooferCommands(this));
 
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
 
         if (provider != null) {
             luckPerms = provider.getProvider();
         }
+        new FakePlayersRunnable(this).runTaskTimer(this, 0, fakePlayerManager.getJoinInterval()*20L);
 
-        List<String> ranks = getConfig().getStringList("ranks");
-
-        for (int i = 0; i < 25; i++) {
+        /*for (int i = 0; i < 25; i++) {
             Random random = new Random();
             String rankStr = ranks.get(random.nextInt(ranks.size()));
 
@@ -64,7 +69,12 @@ public class PlayersSpoof extends JavaPlugin implements Listener {
             fakePlayer.setRank(rank);
 
             fakePlayer.create();
-        }
+        }*/
+    }
+
+    @Override
+    public void onDisable() {
+        fakePlayerManager.getFakeEntities().forEach(IFakeEntity::disconnect);
     }
 
     public void copyStreamToFile(InputStream source, File destination) throws IOException {
@@ -94,7 +104,9 @@ public class PlayersSpoof extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event){
-        fakePlayerManager.spawnFakePlayers(event.getPlayer());
+        for (IFakeEntity fakePlayer : fakePlayerManager.getFakeEntities()) {
+            fakePlayer.spawn(event.getPlayer());
+        }
     }
 
     public FakePlayerManager getFakePlayerManager() {

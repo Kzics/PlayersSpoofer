@@ -1,5 +1,8 @@
 main: com.spoofer.PlayersSpoof
 version: 1.0.0
 name: PlayersSpoofer
+commands:
+  spoofer:
+    description: Spoofer command
 depend:
   - LuckPerms

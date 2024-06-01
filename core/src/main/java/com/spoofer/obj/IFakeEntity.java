@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 public interface IFakeEntity {
     void join();
-    void leave();
+    void disconnect();
     void sendMessage(String message);
     void setVisible(boolean visible);
     boolean isVisible();
@@ -15,5 +15,6 @@ public interface IFakeEntity {
     String changeName(String name);
     Location getLocation();
     void spawn(Player player);
+    void create();
 
 }
