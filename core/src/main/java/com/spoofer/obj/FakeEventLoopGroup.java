@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 public class FakeEventLoopGroup extends AbstractEventLoopGroup {
     private final FakeEventLoop eventLoop = new FakeEventLoop();
 
-
     @Override
     public EventLoop next() {
         return eventLoop;

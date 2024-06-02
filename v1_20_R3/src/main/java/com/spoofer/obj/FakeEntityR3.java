@@ -7,10 +7,8 @@ import com.spoofer.manager.SkinDownloader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.server.MinecraftServer;
@@ -26,6 +24,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Method;
@@ -112,10 +111,9 @@ public class FakeEntityR3 implements IFakeEntity {
             throw new RuntimeException(e);
         }
 
-
         this.uuid = UUID.randomUUID();
         GameProfile gameProfile = new GameProfile(uuid, name);
-        ClientInformation info = new ClientInformation("en_us", 0, ChatVisiblity.FULL, false, new Random().nextInt(150), HumanoidArm.RIGHT, true, true);
+        ClientInformation info = new ClientInformation("en_us", 0, ChatVisiblity.FULL, false, 0, HumanoidArm.RIGHT, true, true);
         this.npc = new ServerPlayer(server, worldServer, gameProfile, info);
         for (Player player : Bukkit.getOnlinePlayers()) setSkin(npc.getGameProfile(), player);
 
@@ -123,12 +121,12 @@ public class FakeEntityR3 implements IFakeEntity {
         CommonListenerCookie cookie = new CommonListenerCookie(gameProfile, new Random().nextInt(150),info);
         npc.connection = new EmptyPacketListenerR3(server, connection, npc, cookie);
 
-        PlayerList playerList = server.getPlayerList();
-
         this.npc.listName = Component.empty().append(ChatColor.translateAlternateColorCodes('&', rank + " " + suffix + name));
         this.npc.displayName = Component.empty().append(ChatColor.translateAlternateColorCodes('&', rank + " " + suffix + name)).getString();
+        PlayerList playerList = server.getPlayerList();
 
         playerList.placeNewPlayer(connection, npc, cookie);
+
     }
 
     @Override

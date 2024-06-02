@@ -21,7 +21,7 @@ public class FakeChannel extends AbstractChannel {
         return new AbstractUnsafe() {
             @Override
             public void connect(SocketAddress socketAddress, SocketAddress socketAddress1, ChannelPromise channelPromise) {
-
+                System.out.println("CONNECTED TO CHALLENGE");
             }
         };
     }

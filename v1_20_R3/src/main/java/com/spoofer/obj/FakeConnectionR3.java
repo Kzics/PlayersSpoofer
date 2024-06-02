@@ -23,6 +23,15 @@ public class FakeConnectionR3 extends Connection {
     @Override
     public void setListener(PacketListener packetlistener) {
     }
+    @Override
+    public void flushChannel() {
+    }
+
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
 
     @Override
     public void send(Packet<?> packet) {
@@ -35,14 +44,4 @@ public class FakeConnectionR3 extends Connection {
     public void send(Packet<?> packet, @Nullable PacketSendListener packetsendlistener, boolean flag) {
     }
 
-    @Override
-    public void setListenerForServerboundHandshake(PacketListener listener) {
-        try {
-            java.lang.reflect.Field packetListenerField = Connection.class.getDeclaredField("packetListener");
-            packetListenerField.setAccessible(true);
-            packetListenerField.set(this, listener);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
