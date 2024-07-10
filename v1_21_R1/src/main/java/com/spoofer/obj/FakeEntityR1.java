@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.BundlerInfo;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
@@ -27,8 +26,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -40,7 +41,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class FakeEntityR4 implements IFakeEntity {
+public class FakeEntityR1 implements IFakeEntity {
 
     protected String name;
     protected boolean visible;
@@ -50,15 +51,15 @@ public class FakeEntityR4 implements IFakeEntity {
     private ServerPlayer npc;
     private UUID uuid;
 
-    public FakeEntityR4(String name, Location location) {
+    public FakeEntityR1(String name, Location location) {
         this(name, true, "default", "", location);
     }
 
-    public FakeEntityR4(String name, boolean visible, Location location) {
+    public FakeEntityR1(String name, boolean visible, Location location) {
         this(name, visible, "default", "", location);
     }
 
-    public FakeEntityR4(String name, boolean visible, String rank, String suffix, Location location) {
+    public FakeEntityR1(String name, boolean visible, String rank, String suffix, Location location) {
         this.name = name;
         this.visible = visible;
         this.rank = rank;
@@ -101,7 +102,7 @@ public class FakeEntityR4 implements IFakeEntity {
         Server bukkitServer = Bukkit.getServer();
         MinecraftServer server;
         try {
-            Class<?> craftServerClass = Class.forName("org.bukkit.craftbukkit.v1_20_R4.CraftServer");
+            Class<?> craftServerClass = Class.forName("org.bukkit.craftbukkit.v1_21_R1.CraftServer");
             Method getServerMethod = craftServerClass.getMethod("getServer");
             server = (MinecraftServer) getServerMethod.invoke(bukkitServer);
         } catch (Exception e) {
@@ -110,7 +111,7 @@ public class FakeEntityR4 implements IFakeEntity {
 
         ServerLevel worldServer;
         try {
-            Class<?> worldServerClass = Class.forName("org.bukkit.craftbukkit.v1_20_R4.CraftWorld");
+            Class<?> worldServerClass = Class.forName("org.bukkit.craftbukkit.v1_21_R1.CraftWorld");
             Method getHandleMethod = worldServerClass.getMethod("getHandle");
             worldServer = (ServerLevel) getHandleMethod.invoke(location.getWorld());
         } catch (Exception e) {
@@ -122,11 +123,11 @@ public class FakeEntityR4 implements IFakeEntity {
         this.npc = new ServerPlayer(server, worldServer, gameProfile, info);
         for (Player player : Bukkit.getOnlinePlayers()) setSkin(npc.getGameProfile(), player);
 
-        FakeConnectionR4 connection = new FakeConnectionR4(PacketFlow.SERVERBOUND);
+        FakeConnectionR1 connection = new FakeConnectionR1(PacketFlow.SERVERBOUND);
         this.setupNetworkManager(connection);
 
         CommonListenerCookie cookie = new CommonListenerCookie(gameProfile, new Random().nextInt(150),ClientInformation.createDefault(),true);
-        npc.connection = new EmptyPacketListenerR4(server, connection, npc, cookie);
+        npc.connection = new EmptyPacketListenerR1(server, connection, npc, cookie);
 
         this.npc.listName = Component.empty().append(ChatColor.translateAlternateColorCodes('&', rank + " " + suffix + name));
         this.npc.displayName = Component.empty().append(ChatColor.translateAlternateColorCodes('&', rank + " " + suffix + name)).getString();
@@ -135,7 +136,7 @@ public class FakeEntityR4 implements IFakeEntity {
         playerList.placeNewPlayer(connection, npc, cookie);
     }
 
-    private void setupNetworkManager(FakeConnectionR4 networkManager) {
+    private void setupNetworkManager(FakeConnectionR1 networkManager) {
         try {
             ProtocolInfo<?> protocolInfo = EmptyPacketEncoder.PROTOCOL_INFO;
             UnconfiguredPipelineHandler.OutboundConfigurationTask unconfiguredpipelinehandler_d = UnconfiguredPipelineHandler.setupOutboundProtocol(protocolInfo);
@@ -183,7 +184,7 @@ public class FakeEntityR4 implements IFakeEntity {
 
     @Override
     public void disconnect() {
-        npc.connection.disconnect("Disconnected!");
+        npc.connection.disconnect(Component.nullToEmpty("Disconnected!"));
 
         //server.getPlayerList().remove(npc);
         /*if (PlayersSpoof.instance.getConfig().getBoolean("enable-joins-message")) {
@@ -211,7 +212,8 @@ public class FakeEntityR4 implements IFakeEntity {
     public void spawn(Player player) {
         this.npc.absMoveTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
-        ClientboundAddEntityPacket spawn = new ClientboundAddEntityPacket(npc);
+        //ClientboundAddEntityPacket spawn = new ClientboundAddEntityPacket(npc);
+        ((CraftWorld)player.getWorld()).getHandle().addFreshEntity(npc, CreatureSpawnEvent.SpawnReason.CUSTOM);
         ClientboundRotateHeadPacket head = new ClientboundRotateHeadPacket(npc, (byte) ((int) (location.getYaw() * 256.0F / 360.0F)));
 
         if (visible) {
@@ -222,7 +224,7 @@ public class FakeEntityR4 implements IFakeEntity {
             sendPacket(player,infoAdd);
         }
 
-        sendPacket(player, spawn, head);
+        sendPacket(player, head);
     }
 
     @Override
@@ -263,4 +265,3 @@ public class FakeEntityR4 implements IFakeEntity {
         return name;
     }
 }
-

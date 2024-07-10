@@ -14,7 +14,7 @@ public class FakeConnectionR3 extends Connection {
         super(enumprotocoldirection);
         FakeEventLoopGroup eventLoopGroup = new FakeEventLoopGroup();
 
-        channel = new FakeChannel(null);
+        channel = new FakeChannel();
         eventLoopGroup.register(channel);
 
         address = new InetSocketAddress("127.0.0.1", 25565);

@@ -26,6 +26,7 @@
               <include>org.example:core</include>
               <include>org.example:v1_20_R3</include>
               <include>org.example:v1_20_R4</include>
+              <include>org.example:v1_21_R1</include>
             </includes>
           </artifactSet>
         </configuration>

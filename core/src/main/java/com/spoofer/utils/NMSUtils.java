@@ -32,11 +32,17 @@ public class NMSUtils {
                 Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, boolean.class, org.bukkit.Location.class);
 
                 return (IFakeEntity) constructor.newInstance(name, visible, location);
-            }else{
+            }else if(version.equals("1.20.1")){
                 Class<?> clazz = Class.forName("com.spoofer.obj.FakeEntityR3");
                 Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, boolean.class, org.bukkit.Location.class);
 
                 return (IFakeEntity) constructor.newInstance(name, visible, location);
+            }else{
+                Class<?> clazz = Class.forName("com.spoofer.obj.FakeEntityR1");
+                Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, boolean.class, org.bukkit.Location.class);
+
+                return (IFakeEntity) constructor.newInstance(name, visible, location);
+
             }
 
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |

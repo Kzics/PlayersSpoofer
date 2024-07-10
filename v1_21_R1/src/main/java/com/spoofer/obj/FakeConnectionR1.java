@@ -1,6 +1,5 @@
 package com.spoofer.obj;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
@@ -13,11 +12,9 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.InetSocketAddress;
-
-public class FakeConnectionR4 extends Connection {
+public class FakeConnectionR1 extends Connection {
     private static final EventLoop LOOP = (EventLoop)new DefaultEventLoop();
-    public FakeConnectionR4(PacketFlow enumprotocoldirection) {
+    public FakeConnectionR1(PacketFlow enumprotocoldirection) {
         super(enumprotocoldirection);
         FakeChannel fakeChannel = new FakeChannel();
         LOOP.register(fakeChannel);
@@ -27,7 +24,7 @@ public class FakeConnectionR4 extends Connection {
         fakeChannel.pipeline().addLast("packet_handler", (ChannelHandler)this);
 
         this.channel = fakeChannel;
-       // this.channel = new FakeChannel(null);
+        // this.channel = new FakeChannel(null);
 
         address = fakeChannel.remoteAddress();
         //address = new InetSocketAddress("127.0.0.1", 25565);

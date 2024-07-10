@@ -1,88 +1,106 @@
 package com.spoofer.obj;
 
-import io.netty.channel.*;
 
 import java.net.SocketAddress;
+import io.netty.channel.AbstractChannel;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelConfig;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelMetadata;
+import io.netty.channel.ChannelOutboundBuffer;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultChannelConfig;
+import io.netty.channel.EventLoop;
+import java.net.InetSocketAddress;
 
 public class FakeChannel extends AbstractChannel {
-    private final ChannelConfig config = new DefaultChannelConfig(this);
+    private final ChannelConfig config;
+    private final ChannelMetadata metadata;
+    private FakeChannel.State state;
 
-    public FakeChannel(Channel parent) {
-        super(parent);
+    public FakeChannel() {
+        super((Channel)null);
+        this.state = FakeChannel.State.OPEN;
+        this.metadata = new ChannelMetadata(false);
+        this.config = new DefaultChannelConfig(this);
     }
 
-    public ChannelConfig getConfig() {
-        config.setAutoRead(true);
-        return config;
-    }
-
-    @Override
     protected AbstractUnsafe newUnsafe() {
         return new AbstractUnsafe() {
-            @Override
             public void connect(SocketAddress socketAddress, SocketAddress socketAddress1, ChannelPromise channelPromise) {
-                System.out.println("CONNECTED TO CHALLENGE");
+                this.safeSetSuccess(channelPromise);
             }
         };
     }
 
-    @Override
     protected boolean isCompatible(EventLoop eventLoop) {
         return true;
     }
 
-    @Override
     protected SocketAddress localAddress0() {
-        return null;
+        return new InetSocketAddress(25565);
     }
 
-    @Override
     protected SocketAddress remoteAddress0() {
-        return null;
+        return new InetSocketAddress(25565);
     }
 
-    @Override
-    protected void doBind(SocketAddress socketAddress) throws Exception {
-
+    protected void doBind(SocketAddress socketAddress) {
     }
 
-    @Override
-    protected void doDisconnect() throws Exception {
-
+    protected void doDisconnect() {
     }
 
-    @Override
-    protected void doClose() throws Exception {
-
+    protected void doClose() {
+        this.state = FakeChannel.State.CLOSED;
     }
 
-    @Override
-    protected void doBeginRead() throws Exception {
-
+    protected void doBeginRead() {
     }
 
-    @Override
-    protected void doWrite(ChannelOutboundBuffer channelOutboundBuffer) throws Exception {
-
+    protected void doWrite(ChannelOutboundBuffer channelOutboundBuffer) {
+        channelOutboundBuffer.remove();
     }
 
-    @Override
     public ChannelConfig config() {
-        return config;
+        return this.config;
     }
 
-    @Override
     public boolean isOpen() {
-        return false;
+        return this.state == FakeChannel.State.OPEN;
     }
 
-    @Override
     public boolean isActive() {
-        return false;
+        return this.state == FakeChannel.State.OPEN;
     }
 
-    @Override
     public ChannelMetadata metadata() {
-        return new ChannelMetadata(true);
+        return this.metadata;
+    }
+
+    public ChannelFuture write(Object msg) {
+        return this.newSucceededFuture();
+    }
+
+    public ChannelFuture write(Object msg, ChannelPromise promise) {
+        return this.newSucceededFuture();
+    }
+
+    public ChannelFuture writeAndFlush(Object msg) {
+        return this.newSucceededFuture();
+    }
+
+    public ChannelFuture writeAndFlush(Object msg, ChannelPromise promise) {
+        return this.newSucceededFuture();
+    }
+
+    private static enum State {
+        OPEN,
+        CLOSED;
+
+        // $FF: synthetic method
+        private static FakeChannel.State[] $values() {
+            return new FakeChannel.State[]{OPEN, CLOSED};
+        }
     }
 }
